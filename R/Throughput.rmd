@@ -1,0 +1,392 @@
+---
+title: "Econ 366, Data Assignment 2"
+author: "Hiba Zaidi"
+editor: source
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+---
+
+
+
+```{r chunks, echo=T, output=F, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message=F,
+                      warning=F,
+                      include=T)
+
+# include all your code, but not warnings or loading messages in your output
+```
+
+
+```{r packages-data,echo=T,output=F, warning=FALSE,include=T}
+#load your packages
+library(kableExtra)
+library(readxl)
+library(janitor)
+library(tidyverse)
+library(lubridate)
+library(scales)
+library(viridis)
+```
+
+
+## Deliverable 1 
+
+```{r deliverable_1}
+#your code here
+# Load required libraries
+library(kableExtra)
+library(readxl)
+library(janitor)
+library(tidyverse)
+library(lubridate)
+library(scales)
+library(viridis)
+library(cowplot)
+
+get_pipe_data <- function(pipe_name="Enbridge-Mainline") {
+  names <- c("Alliance", "Cochin", "Enbridge-Mainline", "Norman-Wells",
+             "Keystone", "MNP", "Trans-Mountain", "TQM", "tcpl-mainline", "Westcoast", "ngtl")
+  
+  pipe_data <- "No data"
+  
+  if(pipe_name %in% names) {
+    file_name <- paste("https://www.cer-rec.gc.ca/open/energy/throughput-capacity/", 
+                       pipe_name, "-throughput-and-capacity.csv", sep="") 
+    local_file <- paste(pipe_name, ".csv", sep="")
+    download.file(file_name, local_file, mode="wb")
+    pipe_data <- read_csv(file = local_file) %>% 
+      clean_names() %>% 
+      mutate(pipe_name = pipe_name)
+  }
+  
+  pipe_data
+}
+
+leach_graph <- function() {
+  theme_classic() +
+    theme(panel.border = element_blank(),
+          panel.grid = element_blank(),
+          panel.grid.major.y = element_line(color = "gray", linetype="dotted"),
+          axis.line.x = element_line(color = "gray"),
+          axis.line.y = element_line(color = "gray"),
+          axis.text = element_text(size = 12),
+          axis.text.x = element_text(margin = margin(t = 10)),
+          axis.title = element_text(size = 12),
+          plot.subtitle = element_text(size = 12, hjust=0.5),
+          plot.caption = element_text(face="italic", size = 12, hjust=0),
+          legend.key.width=unit(2,"line"),
+          legend.position = "bottom",
+          legend.box = "vertical",
+          legend.text = element_text(size = 12),
+          plot.title = element_text(hjust=0.5, size = 14))
+}
+
+# Download Enbridge Mainline data
+enbridge_data <- get_pipe_data(pipe_name = "Enbridge-Mainline")
+
+enbridge_filtered <- enbridge_data %>%
+  filter(key_point == "ex-Gretna") %>%
+  mutate(date = ymd(paste(year, month, "01", sep="-"))) %>%
+  # combined product and trade_type variable
+  mutate(pair = paste(product, " (", trade_type, ")", sep=""))
+
+# Create plot
+enb_plot <- ggplot(enbridge_filtered, aes(x = date, y = throughput_1000_m3_d, fill = pair)) +
+  geom_area() +
+  geom_line(aes(date, available_capacity_1000_m3_d, color="Available Capacity"), 
+            linewidth=.85, lty="21") +
+  scale_color_manual("", values=c("black")) +
+  labs(title = "Enbridge Canadian Mainline Shipments by Product",
+       x = "",
+       y = "Shipments (Monthly, Thousands of Cubic Meters per Day)",
+       caption = "Source: CER Data for Enbridge Mainline (ex-Gretna), graph by Hiba Zaidi")
+
+final_plot <- enb_plot + 
+  leach_graph() +
+  scale_y_continuous(expand = c(0, 0),
+                    sec.axis = sec_axis(trans=~.*1/.16, 
+                                       name="Shipments (Monthly, Thousands of Barrels per Day)"))
+
+print(final_plot)
+ggsave("enbridge_plot.png", final_plot, width = 12, height = 6, dpi = 300)
+
+```
+
+## Deliverable 2 
+
+
+```{r deliverable_2, echo=T, fig.show='hold'}
+
+get_pipe_data <- function(pipe_name) {
+  file_name <- paste("https://www.cer-rec.gc.ca/open/energy/throughput-capacity/",
+                     pipe_name, "-throughput-and-capacity.csv", sep="")
+  local_file <- paste(pipe_name, ".csv", sep="")
+  download.file(file_name, local_file, mode="wb")
+  pipe_data <- read_csv(file = local_file) %>% 
+    clean_names() %>% 
+    mutate(pipe_name = pipe_name)
+  return(pipe_data)
+}
+
+leach_graph <- function() {
+  theme_classic() +
+    theme(panel.border = element_blank(),
+          panel.grid = element_blank(),
+          panel.grid.major.y = element_line(color = "gray", linetype="dotted"),
+          axis.line.x = element_line(color = "gray"),
+          axis.line.y = element_line(color = "gray"),
+          axis.text = element_text(size = 12),
+          axis.text.x = element_text(margin = margin(t = 10)),
+          axis.title = element_text(size = 12),
+          plot.subtitle = element_text(size = 12, hjust=0.5),
+          plot.caption = element_text(face="italic", size = 12, hjust=0),
+          legend.key.width = unit(2, "line"),
+          legend.position = "bottom",
+          legend.box = "vertical",
+          legend.text = element_text(size = 12),
+          plot.title = element_text(hjust=0.5, size = 14))
+}
+
+# Download Trans-Mountain pipeline data
+tm_data <- get_pipe_data("Trans-Mountain")
+
+tm_plot_data <- tm_data %>%
+  filter(key_point %in% c("Burnaby", "Sumas", "Westridge")) %>%
+  mutate(date = as.Date(date)) %>%
+  mutate(product = case_when(
+    grepl("heavy", product, ignore.case = TRUE) ~ "Domestic Heavy",
+    grepl("light", product, ignore.case = TRUE) ~ "Domestic Light",
+    grepl("refin", product, ignore.case = TRUE) ~ "Refined Petroleum Products",
+    TRUE ~ product
+  )) %>%
+  mutate(product = factor(product, levels = c("Domestic Heavy", "Domestic Light", "Refined Petroleum Products")))
+
+# Create plot
+tm_plot <- ggplot(tm_plot_data, aes(x = date, y = throughput_1000_m3_d, fill = product)) +
+  geom_area(position = "stack") +
+  facet_wrap(~key_point, ncol = 1, scales = "free_y") +
+  scale_fill_manual(values = c("Domestic Heavy" = "#1a476f", 
+                               "Domestic Light" = "#2e6d9e", 
+                               "Refined Petroleum Products" = "#6b6b6b")) +
+  scale_y_continuous(expand = c(0, 0),
+                     sec.axis = sec_axis(transform = ~.*6.29, 
+                                         name = "Shipments (Monthly, Thousands of Barrels per Day)")) +
+  scale_x_date(date_breaks = "2 years", date_labels = "%b\n%Y", expand = c(0, 0)) +
+  labs(title = "Trans-Mountain Pipeline Shipments by Product and Destination",
+       y = "Throughput (1000 m³/d)",
+       x = "",
+       caption = "Source: CER Data for Trans-Mountain, graph by Hiba Zaidi") +
+  leach_graph()
+
+# Display
+print(tm_plot)
+ggsave("transmountain_plot.png", tm_plot, width = 12, height = 6, dpi = 300)
+
+```
+
+## Deliverable 3 
+
+
+```{r deliverable_3}
+
+# Set a longer timeout for large files
+options(timeout = 300)
+
+get_pipe_data <- function(pipe_name = "tcpl-mainline") {
+  local_file <- paste(pipe_name, ".csv", sep = "")
+  
+  if (!file.exists(local_file)) {
+    file_name <- paste("https://www.cer-rec.gc.ca/open/energy/throughput-capacity/", 
+                       pipe_name, "-throughput-and-capacity.csv", sep = "")
+    download.file(file_name, local_file, mode = "wb")
+  }
+  
+  # Read the data
+  pipe_data <- read_csv(file = local_file) %>% 
+    clean_names() %>% 
+    mutate(pipe_name = pipe_name)
+  
+  return(pipe_data)
+}
+
+# Download TCPL mainline data
+tcpl_data <- get_pipe_data("tcpl-mainline")
+
+tcpl_filtered <- tcpl_data %>%
+  filter(key_point %in% c("Prairies", "Northern Ontario Line", "Eastern Triangle - NOL Receipts")) %>%
+  mutate(date = ymd(date)) %>%
+  group_by(key_point) %>%
+  arrange(date) %>%
+  mutate(throughput_smooth = zoo::rollmean(throughput_1000_m3_d, align = "right", na.pad = TRUE)) %>%
+  ungroup() %>%
+  filter(!is.na(throughput_smooth))
+
+tcpl_filtered <- tcpl_filtered %>%
+  mutate(key_point_label = case_when(
+    key_point == "Prairies" ~ "Prairies",
+    key_point == "Northern Ontario Line" ~ "Northern Ontario Line",
+    key_point == "Eastern Triangle - NOL Receipts" ~ "Eastern Triangle"
+  ))
+
+# Create plot
+tcpl_plot <- ggplot(tcpl_filtered, aes(x = date)) +
+  geom_line(aes(y = capacity_1000_m3_d, linetype = "Available Capacity"), color = "black", size = 0.8) +
+  geom_line(aes(y = throughput_smooth, color = "Throughput"), size = 0.6) +
+  facet_grid(key_point_label ~ ., scales = "free_y") +
+  labs(
+    title = "TCPL Canadian Mainline Throughput and Capacity (Prairies and Northern Ontario)",
+    x = "",
+    y = "Throughput/Capacity (1000 m3/d)",
+    caption = "Source: CER Pipeline Profiles\nNote: Throughput shown as 30-day rolling average"
+  ) +
+  scale_x_date(date_labels = "%b\n%Y", date_breaks = "1 year") +
+  scale_color_manual(name = "", values = c("Throughput" = "red")) +
+  scale_linetype_manual(name = "", values = c("Available Capacity" = "dashed")) +
+  theme_classic() +
+  theme(
+    panel.border = element_blank(),
+    panel.grid = element_blank(),
+    panel.grid.major.y = element_line(color = "gray", linetype = "dotted"),
+    axis.line.x = element_line(color = "gray"),
+    axis.line.y = element_line(color = "gray"),
+    axis.text = element_text(size = 10),
+    axis.text.x = element_text(margin = margin(t = 10)),
+    axis.title = element_text(size = 12),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    plot.caption = element_text(face = "italic", size = 10, hjust = 0),
+    legend.position = "bottom",
+    legend.text = element_text(size = 10),
+    plot.title = element_text(hjust = 0.5, size = 14),
+    strip.background = element_blank(),
+    strip.text = element_text(size = 7, face = "bold", hjust = 1)
+  ) +
+  scale_y_continuous(expand = c(0, 0)) +
+  # Combine two legends into one
+  guides(color = guide_legend(override.aes = list(linetype = "solid")),
+         linetype = guide_legend())
+
+# Display
+print(tcpl_plot)
+ggsave("tcpl_plot.png", tcpl_plot, width = 12, height = 6, dpi = 300)
+
+```
+
+
+
+## Deliverable 4 
+
+```{r_deliverable_4}
+
+# Load the data
+data <- read.csv("assignment_2_data.csv")
+
+data <- data %>%
+  rename(period = X...period)
+
+
+# Convert period to Date format
+data$period <- as.Date(data$period, format="%Y-%m-%d")
+
+# Categorize data
+data$origin_group <- ifelse(data$origin_name == "Canada", "Canada", "Rest of the World")
+
+# Create plot
+us_imports_plot <- ggplot(data, aes(x = period, y = quantity, fill = origin_group)) +
+  geom_area(position = "stack") +
+  facet_grid(grade_name ~ destination_name, scales = "free_y") +
+  scale_fill_manual(values = c("Canada" = "red", "Rest of the World" = "blue")) +
+  scale_x_date(labels = date_format("%Y"), breaks = seq(as.Date("2010-01-01"), as.Date("2025-01-01"), by = "5 years")) +
+  labs(title = "US Crude Imports from Canada and the Rest of the World (ROW)",
+       subtitle = "Imports by Refining PADD and Grade",
+       x = "Year",
+       y = "Imports (thousands of barrels per day)",
+       fill = "Origin") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "white", color = NA),
+        plot.background = element_rect(fill = "white", color = NA))
+
+
+print(us_imports_plot)
+ggsave("us_imports_plot.png", plot = us_imports_plot, width = 12, height = 8, dpi = 300, bg = "white")
+
+
+```
+
+## Deliverable 5
+
+```{r_deliverable_5}
+
+# Load required libraries
+library(tidyverse)
+library(readxl)
+library(scales)
+library(janitor)
+
+input_file <- "em-alberta-historical-royalty-revenue-2022-2023.xlsx"
+
+# Read a specific range from Sheet 1, skipping 24 rows
+royalty_data <- read_excel(input_file, sheet = 1, skip = 24) %>% clean_names()
+
+# Rename the first column to "resource"
+colnames(royalty_data)[1] <- "resource"
+
+# Filter out rows where "resource" is NA
+royalty_data <- royalty_data %>% filter(!is.na(resource))
+
+# Pivot to long format
+royalty_long <- royalty_data %>%
+  pivot_longer(cols = -resource, names_to = "year", values_to = "revenue") %>%
+  mutate(
+    year = as.numeric(str_extract(year, "[0-9]{4}")), 
+    revenue = as.numeric(gsub("\\$|,| ", "", revenue))  
+  ) %>%
+  filter(resource %in% c(  # Keep only required categories
+    "Natural Gas & By-product Royalty",
+    "Oil Sands Royalty",
+    "Conventional Oil Royalty",
+    "Coal Royalty",
+    "Bonuses & Sales of Crown Leases",
+    "Rentals & Fees"
+  ))
+
+print(unique(royalty_long$year))
+
+color_mapping <- c(
+  "Natural Gas & By-product Royalty" = "#1f77b4",
+  "Oil Sands Royalty" = "#ff7f0e",
+  "Conventional Oil Royalty" = "#2ca02c",
+  "Coal Royalty" = "#d62728",
+  "Bonuses & Sales of Crown Leases" = "#9467bd",
+  "Rentals & Fees" = "#8c564b"
+)
+
+# Create plot
+royalty_rev_plot <- ggplot(royalty_long, aes(x = year, y = revenue / 1000, fill = resource)) +
+  geom_area() +
+  scale_fill_manual(values = color_mapping) +
+  scale_x_continuous(breaks = seq(1970, 2023, by = 5)) +  # X-axis: 1970-2023, 5-year intervals
+  scale_y_continuous(labels = comma, limits = c(0, 25), breaks = seq(0, 25, by = 5)) +  # Y-axis: 0-25, in billions
+  labs(
+    title = "Alberta Royalty Revenue",
+    x = "Year",
+    y = "Royalty Revenue (CAD Billions)",
+    fill = "Resource"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom",
+    plot.title = element_text(hjust = 0.5)
+  )
+
+print(royalty_rev_plot)
+ggsave("royalty_rev_plot.png", plot = royalty_rev_plot, width = 12, height = 8, dpi = 300, bg = "white")
+
+
+```
+
+
+
+
