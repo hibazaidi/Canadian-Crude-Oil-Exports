@@ -4,7 +4,7 @@ This project examines throughput and capacity trends for major Canadian pipeline
 
 ### Enbridge Mainline Throughput by Product
 
-![Enbridge Mainline Plot](images/enbridge_plot.png)
+![Enbridge Mainline Plot](Images/enbridge_plot.png)
 
 > This plot shows monthly shipments through the Enbridge Mainline by product type, with dual-axis conversion to barrels/day.
 
@@ -12,7 +12,7 @@ This project examines throughput and capacity trends for major Canadian pipeline
 
 ### Trans Mountain Shipments by Product and Destination
 
-![Trans Mountain Plot](images/transmountain_plot.png)
+![Trans Mountain Plot](Images/transmountain_plot.png)
 
 > Area chart visualizing shipment volumes at Burnaby, Sumas, and Westridge terminals by product type.
 
@@ -20,7 +20,7 @@ This project examines throughput and capacity trends for major Canadian pipeline
 
 ### TCPL Mainline: Throughput vs. Capacity
 
-![TCPL Plot](images/tcpl_plot.png)
+![TCPL Plot](Images/tcpl_plot.png)
 
 > Rolling-average throughput vs. nameplate capacity at three key points on the TCPL mainline. Annotated with stylized themes and clear faceting.
 
