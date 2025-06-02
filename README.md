@@ -1,2 +1,36 @@
-# Canadian-Pipeline-Throughput
-Analyzes Canadian pipeline throughput and capacity trends using CER data. Visualizes Enbridge and TransMountain shipments by product and key points using ggplot2, dplyr, and custom themes. Includes secondary axis conversion to barrels/day.
+# Canadian Pipeline Throughput Visualization
+
+This project examines throughput and capacity trends for major Canadian pipelines, utilizing data from the Canada Energy Regulator (CER). The assignment includes data processing in R and visualizations for three pipelines: Enbridge Mainline, Trans Mountain, and TCPL Mainline.
+
+### Enbridge Mainline Throughput by Product
+
+![Enbridge Mainline Plot](images/enbridge_plot.png)
+
+> This plot shows monthly shipments through the Enbridge Mainline by product type, with dual-axis conversion to barrels/day.
+
+---
+
+### Trans Mountain Shipments by Product and Destination
+
+![Trans Mountain Plot](images/transmountain_plot.png)
+
+> Area chart visualizing shipment volumes at Burnaby, Sumas, and Westridge terminals by product type.
+
+---
+
+### TCPL Mainline: Throughput vs. Capacity
+
+![TCPL Plot](images/tcpl_plot.png)
+
+> Rolling-average throughput vs. nameplate capacity at three key points on the TCPL mainline. Annotated with stylized themes and clear faceting.
+
+---
+
+## Tools & Packages Used
+
+- **R** (`tidyverse`, `ggplot2`, `lubridate`, `janitor`, `zoo`)
+- **Data Sources**:
+  - Canada Energy Regulator (CER)
+  - Open CER CSV Downloads (throughput & capacity)
+
+
