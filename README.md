@@ -1,4 +1,4 @@
-# Canadian Pipeline Throughput Visualization
+![image](https://github.com/user-attachments/assets/91f70c24-0ced-4d8b-b644-343dc7acdb49)# Canadian Pipeline Throughput Visualization
 
 This project examines throughput and capacity trends for major Canadian pipelines, utilizing data from the Canada Energy Regulator (CER). The assignment includes data processing in R and visualizations for three pipelines: Enbridge Mainline, Trans Mountain, and TCPL Mainline.
 
@@ -23,6 +23,22 @@ This project examines throughput and capacity trends for major Canadian pipeline
 ![TCPL Plot](Images/tcpl_plot.png)
 
 > Rolling-average throughput vs. nameplate capacity at three key points on the TCPL mainline. Annotated with stylized themes and clear faceting.
+
+---
+
+### U.S. Crude Imports by Origin
+
+![U.S. Crude Imports Plot](Images/us_imports_plot.png)
+
+> This area plot shows Canadian vs. Rest of World (ROW) crude imports by U.S. refining PADD and grade.
+
+---
+
+### Alberta Royalty Revenue (1970–2023)
+
+![Alberta Royalty Revenue Plot](Images/royalty_rev_plot.png)
+
+> Historical visualization of Alberta's royalty revenues across six key resource categories. Y-axis scaled in billions of CAD.
 
 ---
 
