@@ -1,8 +1,10 @@
-![image](https://github.com/user-attachments/assets/91f70c24-0ced-4d8b-b644-343dc7acdb49)# Canadian Pipeline Throughput Visualization
+# Canadian-Pipeline-Throughput-Visualizations
 
-This project examines throughput and capacity trends for major Canadian pipelines, utilizing data from the Canada Energy Regulator (CER). The assignment includes data processing in R and visualizations for three pipelines: Enbridge Mainline, Trans Mountain, and TCPL Mainline.
+This project was completed as part of ECON 366 (Energy Economics) at the University of Alberta. It analyzes historical throughput and capacity data from three major Canadian pipelines—Enbridge Mainline, Trans Mountain, and TCPL Mainline—using CER datasets. The assignment emphasizes applied data cleaning, R-based visualization, and infrastructure-specific insight into the flow of crude oil and refined products across Canada.
 
-### Enbridge Mainline Throughput by Product
+## Deliverables
+
+### 1. Enbridge Mainline Throughput by Product
 
 ![Enbridge Mainline Plot](Images/enbridge_plot.png)
 
@@ -10,7 +12,7 @@ This project examines throughput and capacity trends for major Canadian pipeline
 
 ---
 
-### Trans Mountain Shipments by Product and Destination
+### 2. Trans Mountain Shipments by Product and Destination
 
 ![Trans Mountain Plot](Images/transmountain_plot.png)
 
@@ -18,7 +20,7 @@ This project examines throughput and capacity trends for major Canadian pipeline
 
 ---
 
-### TCPL Mainline: Throughput vs. Capacity
+### 3. TCPL Mainline: Throughput vs. Capacity
 
 ![TCPL Plot](Images/tcpl_plot.png)
 
@@ -26,7 +28,7 @@ This project examines throughput and capacity trends for major Canadian pipeline
 
 ---
 
-### U.S. Crude Imports by Origin
+### 4. U.S. Crude Imports by Origin
 
 ![U.S. Crude Imports Plot](Images/us_imports_plot.png)
 
@@ -34,7 +36,7 @@ This project examines throughput and capacity trends for major Canadian pipeline
 
 ---
 
-### Alberta Royalty Revenue (1970–2023)
+### 5. Alberta Royalty Revenue (1970–2023)
 
 ![Alberta Royalty Revenue Plot](Images/royalty_rev_plot.png)
 
